@@ -88,7 +88,8 @@ DATABASES = {
         'NAME': 'auth_system',
         'USER':'postgres',
         'PASSWORD':'AAd!tyAA',
-        'HOST':'localhost',
+        'HOST':'127.0.0.1',
+        'PORT': 5432,
     }
 }
 
@@ -141,7 +142,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Email config
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smpt.gmail.com'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') 
@@ -154,17 +155,17 @@ DJOSER = {
     'USER_CREATE_PASSWORD_RETYPE': True,
     'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
     'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
-    'SEND_EMAIL_CONFIRMATION': True,
+    'SEND_CONFIRMATION_EMAIL': True,
     'SET_USERNAME_RETYPE': True,
     'SET_PASSWORD_RETYPE': True,
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'USERNAME_RESET_CONFIRM_URL': 'email/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL': 'activate/{uid}/{token}',
+    'ACTIVATION_URL': 'auth/activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS':{
-        'user_create':'accounts.serializers.UserCreateSerializers',
-        'user':'accounts.serializers.UserCreateSerializers',
-        'user_delete':'djoser.serializers.UserCreateSerializer',
+                'user_create': 'accounts.serializers.UserCreateSerializers',
+        'user': 'accounts.serializers.UserCreateSerializer',
+                'user_delete': 'djoser.serializers.UserDeleteSerializer',
     }
 }
 
@@ -177,6 +178,9 @@ SIMPLE_JWT = {
 # Rest framework config
 
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES':[
+        'rest_framework.permissions.IsAuthenticated'
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
