@@ -10,6 +10,10 @@ import {
   PASSWORD_REST_CONFIRM_SUCESS,
   PASSWORD_REST_FAIL,
   PASSWORD_REST_SUCCESS,
+  SIGNUP_SUCCESS,
+  SIGNUP_FAIL,
+  ACTIVATION_SUCCESS,
+  ACTIVATION_FAIL
 } from './types'
 import axios from 'axios'
 
@@ -107,6 +111,56 @@ export const login = (email, password) => async dispatch => {
       })
   }
 };
+export const signup = (name, email, password, re_password) => async dispatch => {
+  const config = {
+      headers: {
+          'Content-Type': 'application/json'
+      }
+  };
+
+  const body = JSON.stringify({ name, email, password, re_password });
+
+  try {
+    console.log("Inside try block auth.js/login")
+    const res = await axios.post(`http://localhost:8000/auth/users/`, body, config);
+    
+    console.log("Send Axios Value: ", res)
+
+      dispatch({
+          type: SIGNUP_SUCCESS,
+          payload: res.data
+      });
+
+      dispatch(load_user());
+  } catch (err) {
+      dispatch({
+          type: SIGNUP_FAIL
+      })
+  }
+};
+
+export const verify = (uid, token) => async dispatch => {
+  const config = {
+    headers: {
+      'Content-Type':'application/json',
+    }
+  }
+  const body = JSON.stringify({ uid, token })
+  
+  try {
+    await axios.post(`http://localhost:8000/auth/users/activation/`, body, config);
+
+      dispatch({
+          type: ACTIVATION_SUCCESS,
+      });
+
+      dispatch(load_user());
+  } catch (err) {
+      dispatch({
+          type: ACTIVATION_FAIL
+      })
+  }
+}
 
 export const resetPassword = (email) => async dispatch => {
   const config = {
