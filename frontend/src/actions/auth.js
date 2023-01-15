@@ -5,7 +5,11 @@ import {
   USER_LOADED_FAIL,
   AUTHENTICATED_FAIL,
   AUTHENTICATED_SUCCESS,
-  LOGOUT
+  LOGOUT,
+  PASSWORD_REST_CONFIRM_FAIL,
+  PASSWORD_REST_CONFIRM_SUCESS,
+  PASSWORD_REST_FAIL,
+  PASSWORD_REST_SUCCESS,
 } from './types'
 import axios from 'axios'
 
@@ -51,7 +55,7 @@ export const checkAuthenticated = () => async dispatch => {
       const body = JSON.stringify({ token: localStorage.getItem('access') });
 
       try {
-          const res = await axios.post(`${process.env.REACT_APP_API_URL}/auth/jwt/verify/`, body, config)
+          const res = await axios.post(`http://localhost:8000/auth/jwt/verify/`, body, config)
 
           if (res.data.code !== 'token_not_valid') {
               dispatch({
@@ -85,7 +89,10 @@ export const login = (email, password) => async dispatch => {
   const body = JSON.stringify({ email, password });
 
   try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/auth/jwt/create/`, body, config);
+    console.log("Inside try block auth.js/login")
+    const res = await axios.post(`http://localhost:8000/auth/jwt/create/`, body, config);
+    
+    console.log("Send Axios Value: ", res)
 
       dispatch({
           type: LOGIN_SUCCESS,
@@ -94,11 +101,52 @@ export const login = (email, password) => async dispatch => {
 
       dispatch(load_user());
   } catch (err) {
+    console.log('Inside catch block auth.js/login')
       dispatch({
           type: LOGIN_FAIL
       })
   }
 };
+
+export const resetPassword = (email) => async dispatch => {
+  const config = {
+    headers: {
+      'Content-Type':'application/json',
+    }
+  }
+  const body = JSON.stringify({email})
+  try {
+    await axios.post(`http://localhost:8000/auth/users/reset_password/`, body, config)
+    dispatch({
+      type:PASSWORD_REST_SUCCESS
+    })
+  } catch (error) {
+    dispatch({
+      type: PASSWORD_REST_FAIL
+    })
+    
+  }
+}
+export const resetPasswordConfirm = (uid, token, new_password, re_new_password) => async dispatch => {
+  const config = {
+    headers: {
+      'Content-Type':'application/json',
+    }
+  }
+  const body = JSON.stringify({uid, token, new_password, re_new_password})
+  try {
+    await axios.post(`http://localhost:8000/auth/users/reset_password_confirm/`, body, config)
+    dispatch({
+      type:PASSWORD_REST_CONFIRM_SUCESS
+    })
+  } catch (error) {
+    dispatch({
+      type: PASSWORD_REST_CONFIRM_FAIL
+    })
+    
+  }
+}
+
 
 export const logout = () => dispatch => {
   dispatch({
