@@ -10,6 +10,24 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+# Feasible fix if using django --version < 4 or using social_django 3rd party app
+
+'''
+Solution given for:
+ImportError: cannot import name 'force_text' from 'django.utils.encoding'
+'''
+
+import django
+from django.utils.encoding import force_str
+django.utils.encoding.force_text = force_str
+
+# for ImportError: cannot import name 'urlquote' from 'django.utils.http'
+
+from urllib.parse import quote
+django.utils.http.urlquote = quote
+
+# Normal Settings.py configs
+
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -44,6 +62,9 @@ INSTALLED_APPS = [
     # 3rd party Apps
     'rest_framework',
     'djoser',
+    'social_django',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     # Custom Apps
     'accounts',
 ]
@@ -56,6 +77,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 3rd party middleware
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'auth_system.urls'
@@ -71,6 +94,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -124,7 +149,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
@@ -162,12 +186,17 @@ DJOSER = {
     'USERNAME_RESET_CONFIRM_URL': 'email/reset/confirm/{uid}/{token}',
     'ACTIVATION_URL': 'auth/activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
+    'SOCIAL_AUTH_TOKEN_STRATEGY':'djoser.social.token.jwt.TokenStrategy',
+    'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS':['http://localhost:8000'],
     'SERIALIZERS':{
-                'user_create': 'accounts.serializers.UserCreateSerializers',
+        'user_create': 'accounts.serializers.UserCreateSerializers',
         'user': 'accounts.serializers.UserCreateSerializer',
-                'user_delete': 'djoser.serializers.UserDeleteSerializer',
+        'current_user':'accounts.serializers.UserCreateSerializers',
+        'user_delete': 'djoser.serializers.UserDeleteSerializer',
     }
 }
+
+
 
 # Tells the django that we're using JWT as default authentication
 
@@ -175,7 +204,15 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_TOKEN_CLASSES' :(
+        'rest_framework_simplejwt.tokens.AccessToken',
+    )
 }
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2', # For google login
+    'django.contrib.auth.backends.ModelBackend' # for email and password login
+)
 
 # Rest framework config
 
@@ -190,4 +227,20 @@ REST_FRAMEWORK = {
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.UserAccount'
+
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '225661222887-4t8shk8oct11sbio7mnt04a2demktdci.apps.googleusercontent.com'
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'openid',
+]
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = [
+    'first_name',
+    'last_name'
+]
 

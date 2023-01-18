@@ -13,7 +13,9 @@ import {
   SIGNUP_SUCCESS,
   SIGNUP_FAIL,
   ACTIVATION_SUCCESS,
-  ACTIVATION_FAIL
+  ACTIVATION_FAIL,
+  GOOGLE_AUTH_SUCESS,
+  GOOGLE_AUTH_FAIL,
 } from '../actions/types'
 
 const initialState = {
@@ -69,6 +71,7 @@ export default function foo(state = initialState, action) {
     case LOGIN_FAIL:
     case SIGNUP_FAIL:
     case LOGOUT:
+    case GOOGLE_AUTH_FAIL:
       localStorage.removeItem('access')
       localStorage.removeItem('refresh')
     
@@ -79,7 +82,16 @@ export default function foo(state = initialState, action) {
         isAuthenticated: false,
         user:null
       }
-    
+    case GOOGLE_AUTH_SUCESS:
+      localStorage.getItem('access', payload.access)
+
+      return {
+        ...state,
+        isAuthenticated: true,
+        access: payload.access,
+        refresh: payload.refresh
+      }
+
     case PASSWORD_REST_CONFIRM_FAIL:
     case PASSWORD_REST_CONFIRM_SUCESS:
     case PASSWORD_REST_FAIL:

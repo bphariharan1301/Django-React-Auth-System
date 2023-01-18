@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signup } from '../actions/auth';
+import axios from 'axios';
 
 const SignUp = ({ signup, isAuthenticated }) => {
   const [accountCreated, setAccountCreated] = useState(false)
@@ -10,7 +11,16 @@ const SignUp = ({ signup, isAuthenticated }) => {
         email: '',
     password: '',
         re_password:''
-    });
+  });
+    
+  const continueWithGoogle = async () => {
+    try {
+        const res = await axios.get("http://localhost:8000/auth/o/google-oauth2/?redirect_uri=http://localhost:8000");
+        window.location.replace(res.data.authorization_url)
+    } catch (error) {
+        
+    }
+}
 
   const { name, email, password, re_password } = formData;
 
@@ -93,6 +103,9 @@ const SignUp = ({ signup, isAuthenticated }) => {
                 <br />
                 <button className='btn btn-primary' type='submit'>Register</button>
             </form>
+            <button className='btn btn-danger mt-3' onClick={ continueWithGoogle } >
+                Continue with Google
+            </button>
             <p className='mt-3'>
                 Have an account? <Link to='/login'>Log In</Link>
             </p>

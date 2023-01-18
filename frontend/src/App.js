@@ -7,7 +7,6 @@ import ResetPassword from './containers/ResetPassword';
 import ResetPasswordConfirm from './containers/ResetPasswordConfirm';
 import SignUp from './containers/SignUp';
 import Layout from "./hocs/Layout";
-
 import { Provider } from "react-redux";
 import store from "./store";
 
